@@ -7,8 +7,8 @@
     <ProjectGuid>{D33926ED-7945-4048-816C-01946AB516C7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DeadCliffDivers</RootNamespace>
-    <AssemblyName>DeadCliffDivers</AssemblyName>
+    <RootNamespace>DeadCliffDiversValheim</RootNamespace>
+    <AssemblyName>DeadCliffDiversValheim</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
