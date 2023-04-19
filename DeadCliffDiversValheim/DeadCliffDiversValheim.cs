@@ -49,13 +49,14 @@ namespace DeadCliffDiversValheim
             static void Prefix(Pickable __instance, ref int ___m_amount)
             {
                 List<string> modifyItems = new List<string> { "Raspberry", "Blueberries", "Mushroom", "Carrot", "CarrotSeeds", "Turnip", "TurnipSeeds", "Onion", "OnionSeeds", "Barley", "Flax", "MushroomJotunpuffs", "MushroomMagecap", "Thistle", "Dandelion", "Cloudberry" };
+                int multiplier = 3;
 
                 String item = __instance.m_itemPrefab.name;
                 Debug.Log($"Pickable: '{item}'");
                 if (modifyItems.Contains(item))
                 {
                     Debug.Log($"Modifying pickable: '{item}'");
-                    ___m_amount = (___m_amount * 3);
+                    ___m_amount = (___m_amount * multiplier);
                 }
             }
         }
@@ -148,6 +149,33 @@ namespace DeadCliffDiversValheim
                 }
 
                 return il.AsEnumerable();
+            }
+        }
+
+        // BOSS POWERS
+        [HarmonyPatch(typeof(Player), nameof(Player.SetGuardianPower))]
+        class BossPowers_Patch
+        {
+            private static void Postfix(ref Player __instance)
+            {
+                const float duration = 1800;
+                const float cooldown = 60;
+
+                // (thanks chatgpt):
+                // Use AccessTools.Field to get the private m_guardianSE field from the Player class
+                FieldInfo guardianSEField = AccessTools.Field(typeof(Player), "m_guardianSE");
+
+                // Get the value of the m_guardianSE field for the given Player instance
+                StatusEffect guardianSE = (StatusEffect)guardianSEField.GetValue(__instance);
+
+                if (guardianSE) { 
+                    // Modify the m_ttl and m_cooldown properties of the guardianSE object
+                    guardianSE.m_ttl = duration;
+                    guardianSE.m_cooldown = cooldown;
+
+                    // Set the modified value of the m_guardianSE field for the given Player instance
+                    guardianSEField.SetValue(__instance, guardianSE);
+                }
             }
         }
     }
