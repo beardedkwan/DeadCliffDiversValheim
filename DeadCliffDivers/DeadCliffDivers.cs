@@ -22,7 +22,7 @@ namespace DeadCliffDivers
 
     [BepInPlugin(PluginInfo.Guid, PluginInfo.Name, PluginInfo.Version)]
     [BepInProcess("valheim.exe")]
-    public class dcdMod : BaseUnityPlugin
+    public class DeadCliffDivers : BaseUnityPlugin
     {
         void Awake()
         {
