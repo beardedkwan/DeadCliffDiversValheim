@@ -11,18 +11,18 @@ using HarmonyLib;
 using UnityEngine;
 using System.CodeDom;
 
-namespace DeadCliffDivers
+namespace DeadCliffDiversValheim
 {
     public class PluginInfo
     {
-        public const string Name = "DeadCliffDiversMod";
+        public const string Name = "DeadCliffDiversValheim";
         public const string Guid = "deadcliffdivers" + Name;
         public const string Version = "0.0.0";
     }
 
     [BepInPlugin(PluginInfo.Guid, PluginInfo.Name, PluginInfo.Version)]
     [BepInProcess("valheim.exe")]
-    public class DeadCliffDivers : BaseUnityPlugin
+    public class DeadCliffDiversValheim : BaseUnityPlugin
     {
         void Awake()
         {
