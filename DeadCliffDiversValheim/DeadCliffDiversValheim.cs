@@ -30,7 +30,7 @@ namespace DeadCliffDiversValheim
             harmony.PatchAll();
         }
 
-        // Todo: increased chest sizes, improve smelters size, shared map, no roof for workbenches, player carry weight and belt increase, skill boost
+        // Todo: improve smelters size, shared map, no roof for workbenches, player carry weight and belt increase, skill boost, no planting stamina usage
         // Thinking about: Teleport anything
 
         // INFINITE FIRES
@@ -53,10 +53,10 @@ namespace DeadCliffDiversValheim
                 int multiplier = 3;
 
                 String item = __instance.m_itemPrefab.name;
-                Debug.Log($"Pickable: '{item}'");
+                //Debug.Log($"Pickable: '{item}'");
                 if (modifyItems.Contains(item))
                 {
-                    Debug.Log($"Modifying pickable: '{item}'");
+                    //Debug.Log($"Modifying pickable: '{item}'");
                     ___m_amount = (___m_amount * multiplier);
                 }
             }
@@ -68,8 +68,6 @@ namespace DeadCliffDiversValheim
         {
             static void Postfix(ref DropTable __instance, ref List<GameObject> __result)
             {
-                Debug.Log("Hit GetDropList postfix");
-
                 Dictionary<string, int> modifyItems = new Dictionary<string, int>();
 
                 // Wood
@@ -199,6 +197,53 @@ namespace DeadCliffDiversValheim
                 {
                     __instance.m_width = 8;
                     __instance.m_height = 4;
+                }
+            }
+        }
+
+        // REFINERIES
+        [HarmonyPatch(typeof(Smelter), "Awake")]
+        class Smelter_Patch
+        {
+            private static void Prefix(ref Smelter __instance)
+            {
+                string name = __instance.name;
+                //Debug.Log($"smelter patch, name: '{name}'");
+
+                if (name.StartsWith("charcoal_kiln"))
+                {
+                    __instance.m_maxOre = 60;
+                    __instance.m_secPerProduct = 3f;
+                }
+                else if (name.StartsWith("smelter"))
+                {
+                    __instance.m_maxOre = 60;
+                    __instance.m_maxFuel = 60;
+                    __instance.m_fuelPerProduct = 1;
+                    __instance.m_secPerProduct = 3f;
+                }
+                else if (name.StartsWith("blastfurnace"))
+                {
+                    __instance.m_maxOre = 60;
+                    __instance.m_maxFuel = 60;
+                    __instance.m_fuelPerProduct = 1;
+                    __instance.m_secPerProduct = 3f;
+                }
+                else if (name.StartsWith("piece_spinningwheel"))
+                {
+                    __instance.m_maxOre = 100;
+                    __instance.m_secPerProduct = 3f;
+                }
+                else if (name.StartsWith("windmill"))
+                {
+                    __instance.m_maxOre = 100;
+                    __instance.m_secPerProduct = 3f;
+                }
+                else if (name.StartsWith("eitrrefinery"))
+                {
+                    __instance.m_maxOre = 60;
+                    __instance.m_maxFuel = 60;
+                    __instance.m_secPerProduct = 3f;
                 }
             }
         }
