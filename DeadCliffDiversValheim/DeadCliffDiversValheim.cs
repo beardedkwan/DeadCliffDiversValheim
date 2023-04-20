@@ -18,7 +18,7 @@ namespace DeadCliffDiversValheim
     {
         public const string Name = "DeadCliffDiversValheim";
         public const string Guid = "deadcliffdivers" + Name;
-        public const string Version = "0.0.0";
+        public const string Version = "1.0.0";
     }
 
     [BepInPlugin(PluginInfo.Guid, PluginInfo.Name, PluginInfo.Version)]
