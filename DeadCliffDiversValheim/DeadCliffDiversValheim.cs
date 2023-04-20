@@ -31,7 +31,7 @@ namespace DeadCliffDiversValheim
             harmony.PatchAll();
         }
 
-        // Todo: no planting stamina usage, fermenter, beehive
+        // Todo: fermenter, beehive
 
         // INFINITE FIRES
         [HarmonyPatch(typeof(Fireplace), "UpdateFireplace")]
@@ -317,6 +317,27 @@ namespace DeadCliffDiversValheim
                         v = 0f;
                     }
                 }
+            }
+        }
+
+        // FERMENTER
+        // production speed
+        [HarmonyPatch(typeof(Fermenter), "Awake")]
+        public static class ApplyFermenterChanges
+        {
+            private static void Prefix(ref float ___m_fermentationDuration)
+            {
+                ___m_fermentationDuration = 600f;
+            }
+        }
+
+        // number of items
+        [HarmonyPatch(typeof(Fermenter), "GetItemConversion")]
+        public static class ApplyFermenterItemCountChanges
+        {
+            private static void Postfix(ref Fermenter.ItemConversion __result)
+            {
+                __result.m_producedItems = 18;
             }
         }
     }
