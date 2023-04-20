@@ -30,7 +30,8 @@ namespace DeadCliffDiversValheim
             harmony.PatchAll();
         }
 
-        // WISH LIST: infinite powers, teleporting everything, increased chest sizes, improve smelters size, shared map, no roof for workbenches, player carry weight and belt increase, skill boost
+        // Todo: increased chest sizes, improve smelters size, shared map, no roof for workbenches, player carry weight and belt increase, skill boost
+        // Thinking about: Teleport anything
 
         // INFINITE FIRES
         [HarmonyPatch(typeof(Fireplace), "UpdateFireplace")]
@@ -175,6 +176,29 @@ namespace DeadCliffDiversValheim
 
                     // Set the modified value of the m_guardianSE field for the given Player instance
                     guardianSEField.SetValue(__instance, guardianSE);
+                }
+            }
+        }
+
+        // CHESTS
+        [HarmonyPatch(typeof(Container), "Awake")]
+        class Chests_Patch
+        {
+            private static void Prefix(Container __instance)
+            {
+                string name = __instance.name;
+
+                // wood chest
+                if (name.StartsWith("piece_chest_wood"))
+                {
+                    __instance.m_height = 3;
+                }
+
+                // personal chest
+                if (name.StartsWith("piece_chest_private"))
+                {
+                    __instance.m_width = 8;
+                    __instance.m_height = 4;
                 }
             }
         }
