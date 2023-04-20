@@ -11,6 +11,7 @@ using HarmonyLib;
 using UnityEngine;
 using System.CodeDom;
 using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace DeadCliffDiversValheim
 {
@@ -33,7 +34,7 @@ namespace DeadCliffDiversValheim
 
         // INFINITE FIRES
         [HarmonyPatch(typeof(Fireplace), "UpdateFireplace")]
-        class Fireplace_Patch
+        public static class Fireplace_Patch
         {
             static void Prefix(Fireplace __instance, ref ZNetView ___m_nview)
             {
@@ -43,7 +44,7 @@ namespace DeadCliffDiversValheim
 
         // GATHERING
         [HarmonyPatch(typeof(Pickable), "RPC_Pick")]
-        class Pickable_Patch
+        public static class Pickable_Patch
         {
             static void Prefix(Pickable __instance, ref int ___m_amount)
             {
@@ -62,7 +63,7 @@ namespace DeadCliffDiversValheim
 
         // RESOURCE DROPS
         [HarmonyPatch(typeof(DropTable), "GetDropList", new Type[] { typeof(int) })]
-        class Drops_Patch
+        public static class Drops_Patch
         {
             static void Postfix(ref DropTable __instance, ref List<GameObject> __result)
             {
@@ -105,7 +106,7 @@ namespace DeadCliffDiversValheim
 
         // FOOD DEGREDATION
         [HarmonyPatch]
-        class FoodDeg_Patch
+        public static class FoodDeg_Patch
         {
             private static FieldInfo field_Food_m_health = AccessTools.Field(typeof(Player.Food), "m_health");
             private static FieldInfo field_Food_m_stamina = AccessTools.Field(typeof(Player.Food), "m_stamina");
@@ -151,7 +152,7 @@ namespace DeadCliffDiversValheim
 
         // BOSS POWERS
         [HarmonyPatch(typeof(Player), nameof(Player.SetGuardianPower))]
-        class BossPowers_Patch
+        public static class BossPowers_Patch
         {
             private static void Postfix(ref Player __instance)
             {
@@ -178,7 +179,7 @@ namespace DeadCliffDiversValheim
 
         // CHESTS
         [HarmonyPatch(typeof(Container), "Awake")]
-        class Chests_Patch
+        public static class Chests_Patch
         {
             private static void Prefix(Container __instance)
             {
@@ -201,7 +202,7 @@ namespace DeadCliffDiversValheim
 
         // REFINERIES
         [HarmonyPatch(typeof(Smelter), "Awake")]
-        class Smelter_Patch
+        public static class Smelter_Patch
         {
             private static void Prefix(ref Smelter __instance)
             {
@@ -260,7 +261,7 @@ namespace DeadCliffDiversValheim
 
         // remove roof requirement
         [HarmonyPatch(typeof(CraftingStation), "CheckUsable")]
-        class WorkbenchRemoveRestrictions
+        public static class WorkbenchRemoveRestrictions
         {
             private static void Prefix(ref CraftingStation __instance)
             {
@@ -271,7 +272,7 @@ namespace DeadCliffDiversValheim
         // CARRY WEIGHT
         // base
         [HarmonyPatch(typeof(Player), "Awake")]
-        class BaseCarry_Patch
+        public static class BaseCarry_Patch
         {
             private static void Postfix(ref Player __instance)
             {
@@ -281,7 +282,7 @@ namespace DeadCliffDiversValheim
 
         // megingjord
         [HarmonyPatch(typeof(SE_Stats), "Setup")]
-        class Megingjord_Patch
+        public static class Megingjord_Patch
         {
             private static void Postfix(ref SE_Stats __instance)
             {
@@ -293,7 +294,7 @@ namespace DeadCliffDiversValheim
 
         // SKILLS
         [HarmonyPatch(typeof(Skills), "RaiseSkill")]
-        class Skills_Patch
+        public static class Skills_Patch
         {
             private static void Prefix(ref float factor)
             {
@@ -303,7 +304,7 @@ namespace DeadCliffDiversValheim
 
         // TOOLS STAMINA
         [HarmonyPatch(typeof(Player), "UseStamina")]
-        class ToolsStamina_Patch
+        public static class ToolsStamina_Patch
         {
             private static void Prefix(ref Player __instance, ref float v)
             {
@@ -348,6 +349,64 @@ namespace DeadCliffDiversValheim
                 //___m_secPerUnit = 10f;
                 ___m_maxHoney = 8;
             }
+        }
+
+        // PORTALS
+        [HarmonyPatch(typeof(Inventory), "IsTeleportable")]
+        public static class Portable_Patch
+        {
+            private static void Postfix(ref bool __result)
+            {
+                __result = true;
+            }
+        }
+
+        // WEATHER DAMAGE
+        // rain damage
+        [HarmonyPatch(typeof(WearNTear), "HaveRoof")]
+        public static class RainDamage_Patch
+        {
+            private static void Postfix(ref bool __result)
+            {
+                __result = true;
+            }
+        }
+
+        // underwater damage
+        [HarmonyPatch(typeof(WearNTear), "IsUnderWater")]
+        public static class UnderwaterDamage_Patch
+        {
+            private static void Postfix(ref bool __result)
+            {
+                __result = false;
+            }
+        }
+
+        // ITEMS WHILE SWIMMING
+        [HarmonyPatch(typeof(Humanoid), "UpdateEquipment")]
+        public static class SwimmingAndTools_Patch
+        {
+            private static MethodInfo method_Humanoid_HideHandItems = AccessTools.Method(typeof(Humanoid), nameof(Humanoid.HideHandItems));
+            private static MethodInfo method_HideHandItems = AccessTools.Method(typeof(SwimmingAndTools_Patch), nameof(SwimmingAndTools_Patch.HideHandItems));
+
+            [HarmonyTranspiler]
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                List<CodeInstruction> il = instructions.ToList();
+
+                for (int i = 0; i < il.Count; ++i)
+                {
+                    if (il[i].Calls(method_Humanoid_HideHandItems))
+                    {
+                        il[i - 1].opcode = OpCodes.Nop;
+                        il[i].operand = method_HideHandItems;
+                        break;
+                    }
+                }
+
+                return il.AsEnumerable();
+            }
+            public static void HideHandItems() { }
         }
     }
 }
