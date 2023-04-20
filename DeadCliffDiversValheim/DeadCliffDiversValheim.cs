@@ -30,7 +30,7 @@ namespace DeadCliffDiversValheim
             harmony.PatchAll();
         }
 
-        // Todo: player carry weight and belt increase, skill boost, no planting stamina usage, fermenter, beehive
+        // Todo: skill boost, no planting stamina usage, fermenter, beehive
         // Thinking about: Teleport anything
 
         // INFINITE FIRES
@@ -259,13 +259,37 @@ namespace DeadCliffDiversValheim
                 ___m_maxStationDistance = 15f;
             }
         }
+
         // remove roof requirement
         [HarmonyPatch(typeof(CraftingStation), "CheckUsable")]
-        public static class WorkbenchRemoveRestrictions
+        class WorkbenchRemoveRestrictions
         {
             private static void Prefix(ref CraftingStation __instance)
             {
                 __instance.m_craftRequireRoof = false;
+            }
+        }
+
+        // CARRY WEIGHT
+        // base
+        [HarmonyPatch(typeof(Player), "Awake")]
+        class BaseCarry_Patch
+        {
+            private static void Postfix(ref Player __instance)
+            {
+                __instance.m_maxCarryWeight = 400f;
+            }
+        }
+
+        // megingjord
+        [HarmonyPatch(typeof(SE_Stats), "Setup")]
+        class Megingjord_Patch
+        {
+            private static void Postfix(ref SE_Stats __instance)
+            {
+                if (__instance.m_addMaxCarryWeight > 0) { 
+                    __instance.m_addMaxCarryWeight = (__instance.m_addMaxCarryWeight - 150) + 200;
+                }
             }
         }
     }
