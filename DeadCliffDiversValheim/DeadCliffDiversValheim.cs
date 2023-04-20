@@ -31,8 +31,6 @@ namespace DeadCliffDiversValheim
             harmony.PatchAll();
         }
 
-        // Todo: fermenter, beehive
-
         // INFINITE FIRES
         [HarmonyPatch(typeof(Fireplace), "UpdateFireplace")]
         class Fireplace_Patch
@@ -338,6 +336,17 @@ namespace DeadCliffDiversValheim
             private static void Postfix(ref Fermenter.ItemConversion __result)
             {
                 __result.m_producedItems = 18;
+            }
+        }
+
+        // BEEHIVE
+        [HarmonyPatch(typeof(Beehive), "Awake")]
+        public static class Beehive_Awake_Patch
+        {
+            private static void Prefix(ref float ___m_secPerUnit, ref int ___m_maxHoney)
+            {
+                //___m_secPerUnit = 10f;
+                ___m_maxHoney = 8;
             }
         }
     }
