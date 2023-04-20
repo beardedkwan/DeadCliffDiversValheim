@@ -30,8 +30,7 @@ namespace DeadCliffDiversValheim
             harmony.PatchAll();
         }
 
-        // Todo: skill boost, no planting stamina usage, fermenter, beehive
-        // Thinking about: Teleport anything
+        // Todo: no planting stamina usage, fermenter, beehive
 
         // INFINITE FIRES
         [HarmonyPatch(typeof(Fireplace), "UpdateFireplace")]
@@ -292,5 +291,18 @@ namespace DeadCliffDiversValheim
                 }
             }
         }
+
+        // SKILLS
+        [HarmonyPatch(typeof(Skills), "RaiseSkill")]
+        class Skills_Patch
+        {
+            private static void Prefix(ref float factor)
+            {
+                factor = 1.75f;
+            }
+        }
+
+        // TOOLS STAMINA
+
     }
 }
