@@ -30,7 +30,7 @@ namespace DeadCliffDiversValheim
             harmony.PatchAll();
         }
 
-        // Todo: improve smelters size, shared map, no roof for workbenches, player carry weight and belt increase, skill boost, no planting stamina usage
+        // Todo: player carry weight and belt increase, skill boost, no planting stamina usage, fermenter, beehive
         // Thinking about: Teleport anything
 
         // INFINITE FIRES
@@ -245,6 +245,27 @@ namespace DeadCliffDiversValheim
                     __instance.m_maxFuel = 60;
                     __instance.m_secPerProduct = 3f;
                 }
+            }
+        }
+
+        // CRAFTING STATIONS
+        // increase upgrades distance
+        [HarmonyPatch(typeof(StationExtension), "Awake")]
+        public static class StationExtension_Awake_Patch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref float ___m_maxStationDistance)
+            {
+                ___m_maxStationDistance = 15f;
+            }
+        }
+        // remove roof requirement
+        [HarmonyPatch(typeof(CraftingStation), "CheckUsable")]
+        public static class WorkbenchRemoveRestrictions
+        {
+            private static void Prefix(ref CraftingStation __instance)
+            {
+                __instance.m_craftRequireRoof = false;
             }
         }
     }
