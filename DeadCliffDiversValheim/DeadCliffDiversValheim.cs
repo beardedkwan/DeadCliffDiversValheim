@@ -10,6 +10,7 @@ using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 using System.CodeDom;
+using System.Diagnostics;
 
 namespace DeadCliffDiversValheim
 {
@@ -303,6 +304,20 @@ namespace DeadCliffDiversValheim
         }
 
         // TOOLS STAMINA
-
+        [HarmonyPatch(typeof(Player), "UseStamina")]
+        class ToolsStamina_Patch
+        {
+            private static void Prefix(ref Player __instance, ref float v)
+            {
+                string methodName = new StackTrace().GetFrame(2).GetMethod().Name;
+                if (methodName.Contains("UpdatePlacement") || methodName.Contains("Repair") || methodName.Contains("RemovePiece")) { 
+                    string item = __instance.GetRightItem().m_shared.m_name;
+                    if (item.Equals("$item_hammer") || item.Equals("$item_hoe") || item.Equals("$item_cultivator"))
+                    {
+                        v = 0f;
+                    }
+                }
+            }
+        }
     }
 }
