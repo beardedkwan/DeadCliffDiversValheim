@@ -85,7 +85,6 @@ namespace DeadCliffDiversValheim
                 // Misc
                 modifyItems.Add("Chitin", 3);
 
-                List<GameObject> drops = new List<GameObject>();
                 foreach (GameObject toDrop in __result)
                 {
                     if (modifyItems.ContainsKey(toDrop.name))
@@ -95,12 +94,10 @@ namespace DeadCliffDiversValheim
 
                         for (int i = 0; i < multiplier; i++)
                         {
-                            drops.Add(toDrop);
+                            __result.Add(toDrop);
                         }
                     }
                 }
-
-                __result = drops;
             }
         }
 
