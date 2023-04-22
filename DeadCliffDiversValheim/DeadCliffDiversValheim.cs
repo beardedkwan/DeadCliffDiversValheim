@@ -12,6 +12,7 @@ using UnityEngine;
 using System.CodeDom;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
+using System.Runtime.Remoting.Messaging;
 
 namespace DeadCliffDiversValheim
 {
@@ -155,14 +156,14 @@ namespace DeadCliffDiversValheim
         }
 
         // BOSS POWERS
+        const float GP_DURATION = 1800f;
+        const float GP_COOLDOWN = 60f;
+        // Player buff
         [HarmonyPatch(typeof(Player), nameof(Player.SetGuardianPower))]
         public static class BossPowers_Patch
         {
             private static void Postfix(ref Player __instance)
             {
-                const float duration = 1800;
-                const float cooldown = 60;
-
                 // (thanks chatgpt):
                 // Use AccessTools.Field to get the private m_guardianSE field from the Player class
                 FieldInfo guardianSEField = AccessTools.Field(typeof(Player), "m_guardianSE");
@@ -172,11 +173,41 @@ namespace DeadCliffDiversValheim
 
                 if (guardianSE) { 
                     // Modify the m_ttl and m_cooldown properties of the guardianSE object
-                    guardianSE.m_ttl = duration;
-                    guardianSE.m_cooldown = cooldown;
+                    guardianSE.m_ttl = GP_DURATION;
+                    guardianSE.m_cooldown = GP_COOLDOWN;
+
+                    Debug.Log($"(BossPowers_Patch) Setting guardianSE.m_ttl to '{GP_DURATION}' and guardianSE.m_cooldown to '{GP_COOLDOWN}'");
 
                     // Set the modified value of the m_guardianSE field for the given Player instance
                     guardianSEField.SetValue(__instance, guardianSE);
+                }
+            }
+        }
+
+        // Other players buff
+        [HarmonyPatch(typeof(SEMan), "AddStatusEffect", new Type[] { typeof(StatusEffect), typeof(bool), typeof(int), typeof(float) })]
+        public static class BossPowersEffects_Patch
+        {
+            private static void Postfix(SEMan __instance, StatusEffect statusEffect, bool resetTime = false, int itemLevel = 0, float skillLevel = 0)
+            {
+                // Access private m_character field off of SEMan
+                FieldInfo characterField = AccessTools.Field(typeof(SEMan), "m_character");
+                Character character = (Character)characterField.GetValue(__instance);
+
+                // Every guardian power starts with GP_
+                if (character.IsPlayer() && statusEffect.name.StartsWith("GP_"))
+                {
+                    // Access status effects
+                    FieldInfo statusEffectsField = AccessTools.Field(typeof(SEMan), "m_statusEffects");
+                    List<StatusEffect> statusEffects = (List<StatusEffect>)statusEffectsField.GetValue(__instance);
+
+                    foreach (StatusEffect buff in statusEffects)
+                    {
+                        if (buff.m_name == __instance.GetStatusEffect(statusEffect.name).m_name)
+                        {
+                            __instance.GetStatusEffect(statusEffect.name).m_ttl = GP_DURATION;
+                        }
+                    }
                 }
             }
         }
@@ -270,6 +301,35 @@ namespace DeadCliffDiversValheim
             private static void Prefix(ref CraftingStation __instance)
             {
                 __instance.m_craftRequireRoof = false;
+            }
+        }
+
+        // workbench range
+        [HarmonyPatch(typeof(CraftingStation), "Start")]
+        public static class WorkbenchRangeIncrease
+        {
+            private static void Prefix(ref CraftingStation __instance, ref float ___m_rangeBuild, GameObject ___m_areaMarker)
+            {
+                try
+                {
+                    const float RANGE = 40f;
+
+                    ___m_rangeBuild = RANGE;
+                    ___m_areaMarker.GetComponent<CircleProjector>().m_radius = ___m_rangeBuild;
+                    float scaleIncrease = (RANGE - 20f) / 20f * 100f;
+                    ___m_areaMarker.gameObject.transform.localScale = new Vector3(scaleIncrease / 100, 1f, scaleIncrease / 100);
+
+                    EffectArea effectArea = __instance.GetComponentInChildren<EffectArea>();
+                    if (effectArea != null && (effectArea.m_type & EffectArea.Type.PlayerBase) != 0)
+                    {
+                        SphereCollider collider = __instance.GetComponentInChildren<SphereCollider>();
+                        if (collider != null)
+                        {
+                            collider.transform.localScale = Vector3.one * RANGE * 2f;
+                        }
+                    }
+                }
+                catch {}
             }
         }
 
